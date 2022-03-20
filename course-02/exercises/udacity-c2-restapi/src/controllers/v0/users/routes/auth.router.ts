@@ -1,22 +1,20 @@
-import { Router, Request, Response } from 'express';
+import {Request, Response, Router} from 'express';
 
-import { User } from '../models/User';
+import {User} from '../models/User';
 
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
-import { NextFunction } from 'connect';
+import {NextFunction} from 'connect';
 
 import * as EmailValidator from 'email-validator';
 
-import { config } from '../../../../config/config';
+import {config} from '../../../../config/config';
 
 const router: Router = Router();
 
 async function generatePassword(plainTextPassword: string): Promise<string> {
     const salt = await bcrypt.genSalt(10);
-    const hash = await bcrypt.hash(plainTextPassword, salt);
-
-    return hash;
+    return await bcrypt.hash(plainTextPassword, salt);
 }
 
 async function comparePasswords(plainTextPassword: string, hash: string): Promise<boolean> {
@@ -24,16 +22,13 @@ async function comparePasswords(plainTextPassword: string, hash: string): Promis
 }
 
 function generateJWT(user: User): string {
-    // @TODO Use jwt to create a new JWT Payload containing
     return jwt.sign(user.toJSON(), config.jwt.secret);
 }
 
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
-    console.warn('auth.router not yet implemented, you\'ll cover this in lesson 5');
     if (!req.headers || !req.headers.authorization) {
         return res.status(401).send({ message: 'No authorization headers.' });
     }
-
 
     const token_bearer = req.headers.authorization.split(' ');
     if (token_bearer.length !== 2) {
@@ -83,9 +78,9 @@ router.post('/login', async (req: Request, res: Response) => {
     }
 
     // Generate JWT
-    const jwt = generateJWT(user);
+    const generatedJwt = generateJWT(user);
 
-    res.status(200).send({ auth: true, token: jwt, user: user.short()});
+    res.status(200).send({ auth: true, token: generatedJwt, user: user.short()});
 });
 
 // register a new user
@@ -124,9 +119,9 @@ router.post('/', async (req: Request, res: Response) => {
     }
 
     // Generate JWT
-    const jwt = generateJWT(savedUser);
+    const generatedJwt = generateJWT(savedUser);
 
-    res.status(201).send({token: jwt, user: savedUser.short()});
+    res.status(201).send({token: generatedJwt, user: savedUser.short()});
 });
 
 router.get('/', async (req: Request, res: Response) => {
