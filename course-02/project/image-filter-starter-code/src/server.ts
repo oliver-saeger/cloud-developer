@@ -1,4 +1,4 @@
-import express from 'express';
+import express, {NextFunction, Request, Response} from 'express';
 import bodyParser from 'body-parser';
 import {filterImageFromURL, deleteLocalFiles} from './util/util';
 
@@ -29,7 +29,7 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
 
   /**************************************************************************** */
 
-  app.get('/filteredimage', async (req, res, next) => {
+  app.get('/filteredimage', async (req: Request, res:Response, next:NextFunction) => {
     const imageUrl = req.query.image_url;
 
     if (!imageUrl && !imageUrl.isEmpty()) {
@@ -41,7 +41,7 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
     });
 
     if(filteredPath) {
-      res.sendFile(<string>filteredPath, () => {
+      res.status(200).sendFile(<string>filteredPath, () => {
         deleteLocalFiles([<string>filteredPath]);
       });
     }
